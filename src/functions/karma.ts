@@ -23,11 +23,15 @@ export const KarmaFunction = DefineFunction({
         type: Schema.types.number,
       },
     },
-    required: ["karma"],
+    required: [],
   },
 });
 
 export default SlackFunction(KarmaFunction, async ({ inputs, token }) => {
+  if (!inputs.target) {
+    return { outputs: {} };
+  }
+
   const client = SlackAPI(token, {});
 
   const result = await client.apps.datastore.query({

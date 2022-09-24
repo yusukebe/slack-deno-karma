@@ -1,6 +1,7 @@
 import { DefineWorkflow, Schema } from "deno-slack-sdk/mod.ts";
 import { ExtractFunction } from "./functions/extract.ts";
 import { KarmaFunction } from "./functions/karma.ts";
+import { SendFunction } from "./functions/send.ts";
 
 export const Workflow = DefineWorkflow({
   callback_id: "karma",
@@ -30,9 +31,10 @@ const karmaStep = Workflow.addStep(KarmaFunction, {
   plus: extractStep.outputs.plus,
 });
 
-Workflow.addStep(Schema.slack.functions.SendMessage, {
-  channel_id: Workflow.inputs.channelId,
-  message: `${extractStep.outputs.target}: ${karmaStep.outputs.karma}`,
+Workflow.addStep(SendFunction, {
+  channelId: Workflow.inputs.channelId,
+  target: extractStep.outputs.target,
+  karma: karmaStep.outputs.karma,
 });
 
 export default Workflow;
