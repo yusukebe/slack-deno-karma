@@ -1,6 +1,6 @@
 import { DefineFunction, Schema, SlackFunction } from "deno-slack-sdk/mod.ts";
 import { SlackAPI } from "deno-slack-api/mod.ts";
-import { DATASTORE_NAME } from "../datastore.ts";
+import { Datastore, DATASTORE_NAME } from "../datastore.ts";
 
 export const KarmaFunction = DefineFunction({
   callback_id: "karma-function",
@@ -34,23 +34,24 @@ export default SlackFunction(KarmaFunction, async ({ inputs, token }) => {
 
   const client = SlackAPI(token, {});
 
-  const result = await client.apps.datastore.query({
-    datastore: DATASTORE_NAME,
-    expression: "#target = :target",
-    expression_attributes: { "#target": "target" },
-    expression_values: { ":target": inputs.target },
-  });
+  const result = await client.apps.datastore.query<typeof Datastore.definition>(
+    {
+      datastore: DATASTORE_NAME,
+      expression: "#target = :target",
+      expression_attributes: { "#target": "target" },
+      expression_values: { ":target": inputs.target },
+    },
+  );
 
   let karma = 0;
 
   if (result.items.length > 0) {
-    const item = result["items"][0];
-    karma = item["karma"] as number;
-    karma = getKarma(karma, inputs.plus);
+    const item = result.items[0];
+    karma = getKarma(item.karma, inputs.plus);
     await client.apps.datastore.put({
       datastore: DATASTORE_NAME,
       item: {
-        id: item["id"],
+        id: item.id,
         karma: karma,
       },
     });

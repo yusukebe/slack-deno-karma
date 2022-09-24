@@ -18,15 +18,22 @@ export const SendFunction = DefineFunction({
         type: Schema.slack.types.channel_id,
       },
     },
-    required: ["target", "karma", "channelId"],
+    required: ["channelId"],
   },
 });
 
 export default SlackFunction(SendFunction, ({ inputs, token }) => {
+  let message = "";
+  if (!inputs.target || !inputs.karma) {
+    message = "Usage: @karma {name}++";
+  } else {
+    message = `${inputs.target} : ${inputs.karma}`;
+  }
+
   const client = SlackAPI(token, {});
   client.chat.postMessage({
     channel: inputs.channelId,
-    text: `${inputs.target} : ${inputs.karma}`,
+    text: message,
   });
   return {
     outputs: {},
