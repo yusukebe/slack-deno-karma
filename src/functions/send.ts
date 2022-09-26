@@ -24,7 +24,7 @@ export const SendFunction = DefineFunction({
 
 export default SlackFunction(SendFunction, ({ inputs, token }) => {
   let message = "";
-  if (!inputs.target || !inputs.karma) {
+  if (inputs.target === undefined || inputs.karma === undefined) {
     message = "Usage: @karma {name}++";
   } else {
     message = `${inputs.target} : ${inputs.karma}`;
